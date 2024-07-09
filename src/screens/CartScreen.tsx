@@ -55,10 +55,10 @@ const CartScreen: React.FC = () => {
 };
 
 const styles = StyleSheet.create({
-  container: { flex: 1, padding: 20 },
+  container: { flex: 1, padding: 20, backgroundColor: '#f7f7f7' },
   title: { fontSize: 24, fontWeight: 'bold', marginBottom: 10 },
-  item: { marginBottom: 15 },
-  name: { fontSize: 18 },
+  item: { marginBottom: 15, backgroundColor: 'white', padding: 15, borderRadius: 5, shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.1, shadowRadius: 2, elevation: 2 },
+  name: { fontSize: 18, fontWeight: 'bold' },
   description: { fontSize: 16, color: 'gray' }
 });
 

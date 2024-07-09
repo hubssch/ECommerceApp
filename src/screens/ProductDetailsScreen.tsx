@@ -55,7 +55,7 @@ const ProductDetailsScreen: React.FC = () => {
 };
 
 const styles = StyleSheet.create({
-  container: { flex: 1, padding: 20 },
+  container: { flex: 1, padding: 20, backgroundColor: '#f7f7f7' },
   title: { fontSize: 24, fontWeight: 'bold', marginBottom: 10 },
   body: { fontSize: 16 }
 });

@@ -55,7 +55,7 @@ const UserProfileScreen: React.FC = () => {
 };
 
 const styles = StyleSheet.create({
-  container: { flex: 1, padding: 20 },
+  container: { flex: 1, padding: 20, backgroundColor: '#f7f7f7' },
   title: { fontSize: 24, fontWeight: 'bold', marginBottom: 20 },
   label: { fontSize: 18, fontWeight: 'bold', marginTop: 10 },
   value: { fontSize: 18, color: 'gray' }
