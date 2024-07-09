@@ -1,53 +1,58 @@
-import React from 'react';
-import { TextInput, Button } from 'react-native';
-import styled from 'styled-components/native';
+import * as React from 'react';
+import { useEffect, useState } from 'react';
+import { View, Text, FlatList, StyleSheet } from 'react-native';
+import axios from 'axios';
+
+interface Album {
+  id: number;
+  title: string;
+}
 
 const CheckoutScreen: React.FC = () => {
+  const [albums, setAlbums] = useState<Album[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    axios.get('https://jsonplaceholder.typicode.com/albums')
+      .then(response => {
+        setAlbums(response.data);
+        setLoading(false);
+      })
+      .catch(error => {
+        console.error(error);
+        setLoading(false);
+      });
+  }, []);
+
+  if (loading) {
+    return (
+      <View style={styles.container}>
+        <Text>Loading...</Text>
+      </View>
+    );
+  }
+
   return (
-    <Container>
-      <SectionTitle>Checkout</SectionTitle>
-      <Form>
-        <Label>Full Name</Label>
-        <Input placeholder="John Doe" />
-        <Label>Address</Label>
-        <Input placeholder="123 Main St" />
-        <Label>City</Label>
-        <Input placeholder="Anytown" />
-        <Label>Credit Card</Label>
-        <Input placeholder="1234 5678 9101 1121" />
-        <Button title="Confirm Purchase" onPress={() => {/* Confirm purchase functionality */}} />
-      </Form>
-    </Container>
+    <View style={styles.container}>
+      <Text style={styles.title}>Checkout Steps</Text>
+      <FlatList
+        data={albums}
+        keyExtractor={item => item.id.toString()}
+        renderItem={({ item }) => (
+          <View style={styles.item}>
+            <Text style={styles.name}>{item.title}</Text>
+          </View>
+        )}
+      />
+    </View>
   );
 };
 
-const Container = styled.View`
-  flex: 1;
-  background-color: #fff;
-  padding: 20px;
-`;
-
-const SectionTitle = styled.Text`
-  font-size: 24px;
-  font-weight: bold;
-  margin-bottom: 20px;
-`;
-
-const Form = styled.View`
-  margin-top: 20px;
-`;
-
-const Label = styled.Text`
-  font-size: 16px;
-  margin-bottom: 5px;
-`;
-
-const Input = styled.TextInput`
-  height: 40px;
-  border: 1px solid #ccc;
-  padding: 10px;
-  margin-bottom: 20px;
-  border-radius: 5px;
-`;
+const styles = StyleSheet.create({
+  container: { flex: 1, padding: 20 },
+  title: { fontSize: 24, fontWeight: 'bold', marginBottom: 10 },
+  item: { marginBottom: 15 },
+  name: { fontSize: 18 }
+});
 
 export default CheckoutScreen;

@@ -1,74 +1,65 @@
-import React from 'react';
-import { ScrollView, Button } from 'react-native';
-import styled from 'styled-components/native';
+import * as React from 'react';
+import { useEffect, useState } from 'react';
+import { View, Text, FlatList, StyleSheet, TouchableOpacity } from 'react-native';
+import axios from 'axios';
+import { useNavigation } from '@react-navigation/native';
 
-const ProductListScreen: React.FC = ({ navigation, route }) => {
-  const { category } = route.params;
+interface Post {
+  id: number;
+  title: string;
+  body: string;
+}
+
+const ProductListScreen: React.FC = () => {
+  const [posts, setPosts] = useState<Post[]>([]);
+  const [loading, setLoading] = useState(true);
+  const navigation = useNavigation();
+
+  useEffect(() => {
+    axios.get('https://jsonplaceholder.typicode.com/posts')
+      .then(response => {
+        setPosts(response.data);
+        setLoading(false);
+      })
+      .catch(error => {
+        console.error(error);
+        setLoading(false);
+      });
+  }, []);
+
+  if (loading) {
+    return (
+      <View style={styles.container}>
+        <Text>Loading...</Text>
+      </View>
+    );
+  }
 
   return (
-    <Container>
-      <SectionTitle>{category}</SectionTitle>
-      <ScrollView>
-        <ProductCard>
-          <ProductImage source={{ uri: 'https://example.com/product1.jpg' }} />
-          <ProductDetails>
-            <ProductName>Product 1</ProductName>
-            <ProductPrice>$100</ProductPrice>
-            <Button title="View Details" onPress={() => navigation.navigate('ProductDetails', { productId: 1 })} />
-          </ProductDetails>
-        </ProductCard>
-        <ProductCard>
-          <ProductImage source={{ uri: 'https://example.com/product2.jpg' }} />
-          <ProductDetails>
-            <ProductName>Product 2</ProductName>
-            <ProductPrice>$200</ProductPrice>
-            <Button title="View Details" onPress={() => navigation.navigate('ProductDetails', { productId: 2 })} />
-          </ProductDetails>
-        </ProductCard>
-      </ScrollView>
-    </Container>
+    <View style={styles.container}>
+      <Text style={styles.title}>Products</Text>
+      <FlatList
+        data={posts}
+        keyExtractor={item => item.id.toString()}
+        renderItem={({ item }) => (
+          <TouchableOpacity onPress={() => navigation.navigate('ProductDetails', { userId: item.id })}>
+            <View style={styles.item}>
+              <Text style={styles.name}>{item.title}</Text>
+              <Text style={styles.description}>{item.body}</Text>
+            </View>
+          </TouchableOpacity>
+        )}
+      />
+    </View>
   );
 };
 
-const Container = styled.View`
-  flex: 1;
-  background-color: #fff;
-  padding: 20px;
-`;
-
-const SectionTitle = styled.Text`
-  font-size: 24px;
-  font-weight: bold;
-  margin-bottom: 20px;
-`;
-
-const ProductCard = styled.View`
-  flex-direction: row;
-  margin-bottom: 20px;
-  background-color: #f5f5f5;
-  padding: 10px;
-  border-radius: 10px;
-`;
-
-const ProductImage = styled.Image`
-  width: 100px;
-  height: 100px;
-  margin-right: 10px;
-`;
-
-const ProductDetails = styled.View`
-  justify-content: center;
-  flex: 1;
-`;
-
-const ProductName = styled.Text`
-  font-size: 18px;
-  font-weight: bold;
-`;
-
-const ProductPrice = styled.Text`
-  font-size: 16px;
-  color: #888;
-`;
+const styles = StyleSheet.create({
+  container: { flex: 1, padding: 20 },
+  title: { fontSize: 24, fontWeight: 'bold', marginBottom: 10 },
+  item: { marginBottom: 15 },
+  name: { fontSize: 18 },
+  description: { fontSize: 16, color: 'gray' }
+});
 
 export default ProductListScreen;

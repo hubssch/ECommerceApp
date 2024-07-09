@@ -1,34 +1,65 @@
-import React, { useEffect, useState } from 'react';
-import { View, Text, FlatList } from 'react-native';
+import * as React from 'react';
+import { useEffect, useState } from 'react';
+import { View, Text, FlatList, StyleSheet, TouchableOpacity } from 'react-native';
 import axios from 'axios';
+import { useNavigation } from '@react-navigation/native';
+
+interface User {
+  id: number;
+  name: string;
+  email: string;
+}
 
 const HomeScreen: React.FC = () => {
-  const [posts, setPosts] = useState<any[]>([]);
+  const [users, setUsers] = useState<User[]>([]);
+  const [loading, setLoading] = useState(true);
+  const navigation = useNavigation();
 
   useEffect(() => {
-    axios.get('https://jsonplaceholder.typicode.com/posts')
+    axios.get('https://jsonplaceholder.typicode.com/users')
       .then(response => {
-        setPosts(response.data);
+        setUsers(response.data);
+        setLoading(false);
       })
       .catch(error => {
         console.error(error);
+        setLoading(false);
       });
   }, []);
 
+  if (loading) {
+    return (
+      <View style={styles.container}>
+        <Text>Loading...</Text>
+      </View>
+    );
+  }
+
   return (
-    <View>
-      <Text>Home Screen - Posts</Text>
+    <View style={styles.container}>
+      <Text style={styles.title}>Customers</Text>
       <FlatList
-        data={posts}
+        data={users}
         keyExtractor={item => item.id.toString()}
         renderItem={({ item }) => (
-          <View>
-            <Text>{item.title}</Text>
-          </View>
+          <TouchableOpacity onPress={() => navigation.navigate('ProductDetails', { userId: item.id })}>
+            <View style={styles.item}>
+              <Text style={styles.name}>{item.name}</Text>
+              <Text style={styles.email}>{item.email}</Text>
+            </View>
+          </TouchableOpacity>
         )}
       />
     </View>
   );
 };
+
+const styles = StyleSheet.create({
+  container: { flex: 1, padding: 20 },
+  title: { fontSize: 24, fontWeight: 'bold', marginBottom: 10 },
+  item: { marginBottom: 15 },
+  name: { fontSize: 18 },
+  email: { fontSize: 16, color: 'gray' }
+});
 
 export default HomeScreen;

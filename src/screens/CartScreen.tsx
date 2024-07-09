@@ -1,70 +1,65 @@
-import React from 'react';
-import { ScrollView, Button } from 'react-native';
-import styled from 'styled-components/native';
+import * as React from 'react';
+import { useEffect, useState } from 'react';
+import { View, Text, FlatList, StyleSheet, TouchableOpacity } from 'react-native';
+import axios from 'axios';
+import { useNavigation } from '@react-navigation/native';
 
-const CartScreen: React.FC = ({ navigation }) => {
-  // Mock cart data
-  const cartItems = [
-    { id: 1, name: 'Product 1', price: '$100', quantity: 1 },
-    { id: 2, name: 'Product 2', price: '$200', quantity: 2 },
-  ];
+interface Comment {
+  id: number;
+  name: string;
+  body: string;
+}
 
-  const total = cartItems.reduce((sum, item) => sum + parseInt(item.price.substring(1)) * item.quantity, 0);
+const CartScreen: React.FC = () => {
+  const [comments, setComments] = useState<Comment[]>([]);
+  const [loading, setLoading] = useState(true);
+  const navigation = useNavigation();
+
+  useEffect(() => {
+    axios.get('https://jsonplaceholder.typicode.com/comments')
+      .then(response => {
+        setComments(response.data);
+        setLoading(false);
+      })
+      .catch(error => {
+        console.error(error);
+        setLoading(false);
+      });
+  }, []);
+
+  if (loading) {
+    return (
+      <View style={styles.container}>
+        <Text>Loading...</Text>
+      </View>
+    );
+  }
 
   return (
-    <Container>
-      <ScrollView>
-        <SectionTitle>Your Cart</SectionTitle>
-        {cartItems.map(item => (
-          <CartItem key={item.id}>
-            <CartItemName>{item.name}</CartItemName>
-            <CartItemPrice>{item.price}</CartItemPrice>
-            <CartItemQuantity>Quantity: {item.quantity}</CartItemQuantity>
-          </CartItem>
-        ))}
-        <Total>Total: ${total}</Total>
-        <Button title="Proceed to Checkout" onPress={() => navigation.navigate('Checkout')} />
-      </ScrollView>
-    </Container>
+    <View style={styles.container}>
+      <Text style={styles.title}>Cart Items</Text>
+      <FlatList
+        data={comments}
+        keyExtractor={item => item.id.toString()}
+        renderItem={({ item }) => (
+          <TouchableOpacity onPress={() => navigation.navigate('Checkout', { commentId: item.id })}>
+            <View style={styles.item}>
+              <Text style={styles.name}>{item.name}</Text>
+              <Text style={styles.description}>{item.body}</Text>
+            </View>
+          </TouchableOpacity>
+        )}
+      />
+    </View>
   );
 };
 
-const Container = styled.View`
-  flex: 1;
-  background-color: #fff;
-  padding: 20px;
-`;
-
-const SectionTitle = styled.Text`
-  font-size: 24px;
-  font-weight: bold;
-  margin-bottom: 20px;
-`;
-
-const CartItem = styled.View`
-  background-color: #f5f5f5;
-  padding: 10px;
-  margin-bottom: 10px;
-  border-radius: 10px;
-`;
-
-const CartItemName = styled.Text`
-  font-size: 18px;
-`;
-
-const CartItemPrice = styled.Text`
-  font-size: 16px;
-  color: #888;
-`;
-
-const CartItemQuantity = styled.Text`
-  font-size: 16px;
-`;
-
-const Total = styled.Text`
-  font-size: 20px;
-  font-weight: bold;
-  margin-top: 20px;
-`;
+const styles = StyleSheet.create({
+  container: { flex: 1, padding: 20 },
+  title: { fontSize: 24, fontWeight: 'bold', marginBottom: 10 },
+  item: { marginBottom: 15 },
+  name: { fontSize: 18 },
+  description: { fontSize: 16, color: 'gray' }
+});
 
 export default CartScreen;
